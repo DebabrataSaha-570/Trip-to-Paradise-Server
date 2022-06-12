@@ -32,6 +32,16 @@ async function run() {
             res.json(service)
         })
         app.get('/bookings', async (req, res) => {
+            const email = req.query.email
+            const query = { email: email }
+            const cursor = bookingCollection.find(query)
+            console.log('cursor', cursor)
+            const bookings = await cursor.toArray()
+            console.log('bookings', bookings)
+            res.json(bookings)
+
+        })
+        app.get('/allBookings', async (req, res) => {
             const cursor = bookingCollection.find({})
             const bookings = await cursor.toArray()
             res.json(bookings)
@@ -48,6 +58,24 @@ async function run() {
             const bookings = req.body;
             const result = await bookingCollection.insertOne(bookings);
             console.log(`A document was inserted with the _id: ${result.insertedId}`);
+            res.json(result)
+
+        })
+        //UPDATE API
+        app.put('/approveOrder/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const body = req.body;
+            console.log(body)
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    status: body.status
+                }
+            }
+            const result = await bookingCollection.updateOne(filter, updateDoc, options)
+            console.log(result)
             res.json(result)
 
         })
